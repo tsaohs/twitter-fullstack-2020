@@ -35,7 +35,7 @@ const tweetController = {
 
   getTweets: (req, res) => {
     const whereQuery = {}
-    const userId = req.user.id
+    const userId = helpers.getUser(req).id ? helpers.getUser(req).id : req.user.id
     // console.log()
     Tweet.findAll({
       order: [['createdAt', 'DESC']],
@@ -105,6 +105,7 @@ const tweetController = {
   
   getTweet: (req, res) => {
     const tweetId = req.params.id
+    const userId = helpers.getUser(req).id ? helpers.getUser(req).id : req.user.id
     const whereQuery = {}
     whereQuery.TweetId = tweetId
     return Promise.all([
@@ -128,8 +129,8 @@ const tweetController = {
         ...tweet.dataValues,
         likesCount: tweet.dataValues.LikedUsers ? tweet.dataValues.LikedUsers.length : 0,
         repliesCount: repliesCount,
-        isLiked: tweet.dataValues.LikedUsers.map((d) => d.dataValues.id).includes(req.user.id),
-        isReplied: replies.map((d) => d.dataValues.UserId).includes(req.user.id),
+        isLiked: tweet.dataValues.LikedUsers.map((d) => d.dataValues.id).includes(userId),
+        isReplied: replies.map((d) => d.dataValues.UserId).includes(userId),
         Replies: replies
       }
       // 取得右邊欄位的Top users
