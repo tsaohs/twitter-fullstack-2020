@@ -35,6 +35,7 @@ const tweetController = {
 
   getTweets: (req, res) => {
     const whereQuery = {}
+    const userId = req.user.id
     // console.log()
     Tweet.findAll({
       order: [['createdAt', 'DESC']],
@@ -54,8 +55,8 @@ const tweetController = {
           ...tweet.dataValues,
           repliesCount: reply.count ? reply.count : 0,
           likesCount: tweet.dataValues.Likes ? tweet.dataValues.Likes.length : 0,
-          isLiked: tweet.dataValues.Likes.map((d) => d.dataValues.UserId).includes(req.user.id),
-          isReplied: reply.rows.map((d) => d.dataValues.UserId).includes(req.user.id),
+          isLiked: tweet.dataValues.Likes.map((d) => d.dataValues.UserId).includes(userId),
+          isReplied: reply.rows.map((d) => d.dataValues.UserId).includes(userId),
         }
         return tweetUpdate
       }))
