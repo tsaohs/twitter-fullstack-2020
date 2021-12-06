@@ -7,7 +7,7 @@ module.exports = (app, passport) => {
   //驗証使用者已登入
   const authenticated = (req, res, next) => {
     if (helpers.ensureAuthenticated(req)) {
-      if (req.user.role === 'user') {
+      if (helpers.getUser(req).role === 'user' || !req.user) {
         return next()
       }
       return res.redirect('/admin')
@@ -17,14 +17,13 @@ module.exports = (app, passport) => {
   //驗証Admin已登入
   const authenticatedAdmin = (req, res, next) => {
     if (helpers.ensureAuthenticated(req)) {
-      if (req.user.role === 'admin') {
+      if (helpers.getUser(req).role === 'admin') {
         return next()
       }
       return res.redirect('/')
     }
     res.redirect('/admin/signin')
   }
-
   //admin首頁
   app.get('/admin', authenticatedAdmin, (req, res) => res.redirect('/admin/tweets'))
 
@@ -61,8 +60,20 @@ module.exports = (app, passport) => {
 
   //user推文
   // app.get('/tweets', authenticated, tweetController.getTweets)
-  app.get('/tweets', tweetController.getTweets)
+  app.get('/tweets', authenticated,tweetController.getTweets)
+  app.post('/tweets', authenticated,tweetController.postTweet)
+
   //user推文
   app.get('/tweets/:id/replies', authenticated, tweetController.getTweet)
   app.post('/tweets/:id/replies', authenticated, tweetController.postTweetReply)
+
+  //user喜歡推文
+  app.post('/tweets/:id/like', authenticated, userController.addLike)
+  //user移除喜歡推文
+  app.post('/tweets/:id/unlike', authenticated, userController.removeLike)
+
+  //user追隨
+  app.post('/followships', authenticated, userController.addFollowships)
+  //user取消追隨
+  app.delete('/followships/:id', authenticated, userController.removeFollowing)
 }

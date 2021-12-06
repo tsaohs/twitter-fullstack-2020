@@ -164,24 +164,52 @@
           </div >
           <div class="type-text form-group">
             <input type="hidden" name="TweetId" value="{{tweet.id}}">
-            <textarea 
+            <textarea
+              type = "text" 
               class="form-control new-post-content is-invalid" 
               name="user_reply" 
               id="user_reply"
               placeholder="推你的回覆" 
               rows="5"
-              maxlength="140">
-            </textarea>
-            <div class="invalid-reply" id="reply-tweet">內容不可空白</div>
+              maxlength="140"></textarea>
+            <div class="feedback" id="reply-info"> 內容不可空白 </div>
           </div>
           <div class="add-button">
             <button type="submit" class="btn button" id="reply-btn">回覆</button>
           </div>
+          
         </div>
       </form>
 
     </div>
   </div>
+  <script>
+    let replyButton = document.querySelector('#reply-btn')
+    let reply = document.querySelector('#user_reply')
+    let infomation = document.querySelector('#reply-info')
+    reply.addEventListener('input', function check(event) {
+      console.log(reply.value)
+      console.log(reply.classList)
+      if (reply.value.length < 1) {
+        reply.classList.add("is-invalid")
+        infomation.innerText = '內容不可空白'
+      }
+      if (reply.value.length > 1) {
+        reply.classList.remove("is-invalid")
+        infomation.innerText = `${reply.value.length} / 140`
+      }
+    })
+
+    replyButton.addEventListener('click', function check(event) {
+      console.log('***event.target***',event.target)
+      if (reply.value.length < 1) {
+        reply.classList.add("is-invalid")
+      }
+      if (reply.value.length > 1) {
+        reply.classList.remove("is-invalid")
+      }
+    })
+  </script>
 </div>
 
 {{!-- <div class="modal fade" 

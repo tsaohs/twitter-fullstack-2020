@@ -4,11 +4,14 @@ const Tweet = db.Tweet
 const User = db.User
 const Like = db.Like
 const Reply = db.Reply
+const maxTweetLength = 140
 
 const tweetController = {
-  //***************原始寫法***************/
+  // ***************原始寫法***************/
   // *****這樣findAll 只找的到 3個以內的 reply, 但在Reply 含有 TweetId 的 reply 超過3個!!!!!****/
   // getTweets: (req, res) => {
+  //   // console.log(req.user)
+  //   const userId = helpers.getUser(req).id ? helpers.getUser(req).id : req.user.id
   //   Tweet.findAll({
   //     include: [User, Like, Reply],
   //     order: [['createdAt', 'DESC']],
@@ -19,24 +22,23 @@ const tweetController = {
   //       ...tweet.dataValues,
   //       likesCount: tweet.dataValues.Likes ? tweet.dataValues.Likes.length : 0,
   //       repliesCount: tweet.dataValues.Replies ? tweet.dataValues.Replies.length : 0,
-  //       isLiked: tweet.dataValues.Likes.map((d) => d.dataValues.UserId).includes(req.user.id),
-  //       isReplied: tweet.dataValues.Replies.map((d) => d.dataValues.UserId).includes(req.user.id),
+  //       isLiked: tweet.dataValues.Likes.map((d) => d.dataValues.UserId).includes(userId),
+  //       isReplied: tweet.dataValues.Replies.map((d) => d.dataValues.UserId).includes(userId),
   //     }))
   //     // 取得右邊欄位的Top users
-  //     const topUsers = await helpers.getTopuser(req.user)
+  //     // const topUsers = await helpers.getTopuser(req.user)
   //     // console.log(topUsers)
-  //     console.log(tweets[0])
-  //     return res.render('tweets', {
+  //     // console.log(tweets[0])
+  //     return res.render('index', {
   //       tweets: tweets,
-  //       users: topUsers,
+  //       // users: topUsers,
   //     })
   //   })
   // },
 
   getTweets: (req, res) => {
-    const whereQuery = {}
     const userId = helpers.getUser(req).id ? helpers.getUser(req).id : req.user.id
-    // console.log()
+    // console.log(req)
     Tweet.findAll({
       order: [['createdAt', 'DESC']],
       include: [User, Like],
@@ -62,7 +64,7 @@ const tweetController = {
       }))
       // console.log(tweetsUpdated)
       // 取得右邊欄位的Top users
-      const topUsers = await helpers.getTopuser(req.user)
+      const topUsers = await helpers.getTopuser(helpers.getUser(req))
       // res.send('User1 的 Tweet1 User1 的 Tweet2')
       return res.render('tweets', {
         tweets: tweetsUpdated,
@@ -70,9 +72,22 @@ const tweetController = {
       })
     })
       // console.log(tweets)
-     
   },
-
+  postTweet: (req, res) => {
+    // console.log('***req.body.description.length***',req.body.description.length)
+    const userId = helpers.getUser(req).id ? helpers.getUser(req).id : req.user.id
+    if (req.body.description.length > maxTweetLength || req.body.description.length === 0){
+      return res.redirect('back')
+    }
+    return Tweet.create({
+      description: req.body.description,
+      UserId: userId,
+    }).then((tweet) => {
+      // console.log(tweet)
+      return res.redirect('/tweets')
+    })
+    // res.send(`userId: ${userId} post tweet ${req.body.description}`)
+  },
 
   //***************原始寫法***************/
   // getTweet: (req, res) => {
@@ -143,16 +158,16 @@ const tweetController = {
     })
   },
   postTweetReply: (req, res) => {
+    const userId = helpers.getUser(req).id ? helpers.getUser(req).id : req.user.id
     // console.log(req.body.user_reply)
     return Reply.create({
       comment: req.body.user_reply,
       TweetId: req.body.TweetId,
-      UserId: req.user.id,
+      UserId: userId,
     }).then((reply) => {
       // console.log(reply)
       res.redirect(`/tweets/${req.body.TweetId}/replies`)
     })
-
     // res.send(`/tweet/${req.params.id}/replies`)
   },
   deleteTweetReply: (req, res) => {

@@ -7,6 +7,8 @@ function ensureAuthenticated(req) {
 function getUser(req) {
   return req.user
 }
+
+
 const getTopuser = (currentUser) => {
   return User.findAll({
     include: [{ model: User, as: 'Followers' }],
