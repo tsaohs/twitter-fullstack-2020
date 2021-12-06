@@ -84,10 +84,16 @@
           </div>
 
           <div class="reply">
-            <div class="reply-text">回覆</div>
-            <a href="/users/{{this.User.dataValues.id}}/tweets" class="text-muted">
-              <div class="reply-account">@{{../tweet.User.dataValues.name}}</div>
-            </a>
+            <div class="row">
+              <div class="reply-text ml-3" style="color: gray;"><p style="font-weight:500; ">回覆</p></div>
+                <div class="reply-account">
+                  <a href="/users/{{this.User.dataValues.id}}/tweets" class="text-muted" style="">
+                    <p style="color: #FF6600; font-weight:500;">
+                      @{{../tweet.User.dataValues.name}}
+                    </p>
+                  </a>
+                </div>
+            </div>
           </div>
           <div class="post-text d-flex" style="flex:auto"> {{this.dataValues.comment}} </div>
         </div>

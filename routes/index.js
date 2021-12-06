@@ -10,7 +10,7 @@ module.exports = (app, passport) => {
       if (helpers.getUser(req).role === 'user' || !req.user) {
         return next()
       }
-      return res.redirect('/admin')
+      return res.redirect('/admin/tweets')
     }
     res.redirect('/signin')
   }
@@ -38,6 +38,7 @@ module.exports = (app, passport) => {
 
   //admin管理推文
   app.get('/admin/tweets', authenticatedAdmin, adminController.getTweets)
+  app.delete('/admin/tweets/:id', authenticatedAdmin, adminController.deleteTweet)
 
   //admin管理使用者
   app.get('/admin/users', authenticatedAdmin, adminController.getUsers)
