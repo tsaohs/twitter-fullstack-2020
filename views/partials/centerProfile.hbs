@@ -139,25 +139,25 @@
     <div class="tweet col-md-12" style="padding:15px">
       <div class="d-flex">
         <div class="mt-2 ml-2 col-md-1" style="padding:0">
-          <a href="/users/{{this.User.dataValues.id}}/tweets" class="text-muted">
-            <img class="user-pic mr-2" src="{{this.User.dataValues.avatar}}" style=" width:60PX;height:60px; border-radius:100%;">
+          <a href="/users/{{../user.id}}/tweets" class="text-muted">
+            <img class="user-pic mr-2" src="{{../user.avatar}}" style=" width:60PX;height:60px; border-radius:100%;">
           </a>
         </div>
         <div class="col-md-11">
           <div class="account-info d-flex" style="flex:auto">
-            <a href="/users/{{this.User.dataValues.id}}/tweets" class="text-muted">
-              <div class="user-name" style="color: black; font-weight:bold;">{{this.User.dataValues.name}}</div>
+            <a href="/users/{{../user.id}}/tweets" class="text-muted">
+              <div class="user-name" style="color: black; font-weight:bold;">{{../user.name}}</div>
             </a>
-            <div class="account-time ml-2" style="font-weight:500; color: gray;">@{{this.User.dataValues.account}} • {{moment this.dataValues.createdAt}}</div>
+            <div class="account-time ml-2" style="font-weight:500; color: gray;">@{{../user.account}} • {{moment this.dataValues.createdAt}}</div>
           </div>
 
           <div class="reply">
             <div class="row">
               <div class="reply-text ml-3" style="color: gray;"><p style="font-weight:500; ">回覆</p></div>
                 <div class="reply-account">
-                  <a href="/users/{{this.User.dataValues.id}}/tweets" class="text-muted" style="">
+                  <a href="/users/{{this.dataValues.Tweet.dataValues.User.dataValues.id}}/tweets" class="text-muted" style="">
                     <p style="color: orange; font-weight:500;">
-                      @{{../tweet.User.dataValues.name}}
+                      @{{this.dataValues.Tweet.dataValues.User.dataValues.name}}
                     </p>
                   </a>
                 </div>
@@ -175,8 +175,8 @@
     {{#each likes}}
         <div class="row row-cols-2 border p-2" style="">
             <div class="cols text-center" style=" width:15%">
-                <a  href="/users/{{this.User.dataValues.id}}/tweets">
-                    <img class="" src="{{this.User.dataValues.avatar}}"
+                <a  href="/users/{{this.UserId}}/tweets">
+                    <img class="" src="{{this.Tweet.dataValues.User.dataValues.avatar}}"
                         style=" width:50PX;height:50px; border-radius:100%;"></img>
                 </a>
             </div>
@@ -184,12 +184,12 @@
             <div class="cols" style=" width:85%">
                 <div class="row ml-1">
                     <div class="cols ">
-                        <a class="text-muted" href="/users/{{this.User.dataValues.id}}/tweets">
-                            <p style="color: black; font-weight:bold;">{{this.User.dataValues.name}}</p>
+                        <a class="text-muted" href="/users/{{this.TweetId}}/tweets">
+                            <p style="color: black; font-weight:bold;">{{this.Tweet.dataValues.User.dataValues.name}}</p>
                         </a>
                     </div>
                     <div class="cols ml-1" style="color:gray">
-                        <p style="font-weight:500;">@{{this.User.dataValues.account}}</p>
+                        <p style="font-weight:500;">@{{this.Tweet.dataValues.User.dataValues.account}}</p>
                     </div>
                     <div class="cols mx-1" style="color:gray">
                         <p style="font-weight:500;">•</p>
@@ -201,8 +201,8 @@
                         <p>...</p>
                     </div>
                 </div>
-                <a class="text-muted" href="/tweets/{{this.id}}/replies" style="text-decoration:none;">
-                    <p>{{this.description}}</p>
+                <a class="text-muted" href="/tweets/{{this.Tweet.dataValues.id}}/replies" style="text-decoration:none;">
+                    <p>{{this.Tweet.dataValues.description}}</p>
                 </a>
                 <div class="">
 
@@ -219,12 +219,12 @@
                     {{/if}}
                     <p style="float:left;">{{this.repliesCount}}</p>
                     {{#if isLiked}}
-                        <form id="likeButton" action="/tweets/{{this.id}}/unlike" method="post" style="float:left;" class="ml-3 ">
+                        <form id="likeButton" action="/tweets/{{this.Tweet.dataValues.id}}/unlike" method="post" style="float:left;" class="ml-3 ">
                             <button type="submit" style="border:0px; background:inherit;"><i
                                     class="fas fa-heart"></i></button>
                         </form>
                     {{else}}
-                        <form id="likeButton" action="/tweets/{{this.id}}/like" method="post" style="float:left;" class="ml-3">
+                        <form id="likeButton" action="/tweets/{{this.Tweet.dataValues.id}}/like" method="post" style="float:left;" class="ml-3">
                             <button type="submit" style="border:0px; background:inherit;"><i
                                     class="far fa-heart"></i></button>
                         </form>

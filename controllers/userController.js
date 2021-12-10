@@ -253,13 +253,13 @@ const userController = {
         ...tweet.dataValues,
         likesCount: tweet.dataValues.Likes ? tweet.dataValues.Likes.length : 0,
         repliesCount: tweet.dataValues.Replies ? tweet.dataValues.Replies.length : 0,
-        followerCount: req.user.Followers.length,
-        followingCount: req.user.Followings.length,
-        isLiked: tweet.dataValues.Likes.map((d) => d.dataValues.UserId).includes(req.user.id),
-        isReplied: tweet.dataValues.Replies.map((d) => d.dataValues.UserId).includes(req.user.id),
+        followerCount: helpers.getUser(req).Followers.length,
+        followingCount: helpers.getUser(req).Followings.length,
+        isLiked: tweet.dataValues.Likes.map((d) => d.dataValues.UserId).includes(userid),
+        isReplied: tweet.dataValues.Replies.map((d) => d.dataValues.UserId).includes(userid),
       }))
       // 取得右邊欄位的Top users
-      const topUsers = await helpers.getTopuser(req.user)
+      const topUsers = await helpers.getTopuser(helpers.getUser(req))
       //推文數&追蹤&追隨數量
       const tweetCount = tweets.length
       const followerCount = tweets[0].followerCount
@@ -281,50 +281,116 @@ const userController = {
     const userid = helpers.getUser(req).id ? helpers.getUser(req).id : req.user.id
     // console.log('req params: ' + userid)
     // console.log('req body: ' + req.params.id)
-
-    Tweet.findAll({
-      where: { UserId: userid },
-      include: [User, Like, Reply],
-      order: [['createdAt', 'DESC']],
-    }).then(async (tweets) => {
-      //計算 該則 tweet 被其他使用者喜歡或 有留言的次數
-      //決定 tweets.handlebar 上的 留言跟喜歡按鈕是要實心或空心
-      replies = tweets.map((reply) => ({
-        ...reply.dataValues,
-      }))
-      tweets = tweets.map((tweet) => ({
-        ...tweet.dataValues,
-        likesCount: tweet.dataValues.Likes ? tweet.dataValues.Likes.length : 0,
-        repliesCount: tweet.dataValues.Replies ? tweet.dataValues.Replies.length : 0,
-        followerCount: req.user.Followers.length,
-        followingCount: req.user.Followings.length,
-        isLiked: tweet.dataValues.Likes.map((d) => d.dataValues.UserId).includes(req.user.id),
-        isReplied: tweet.dataValues.Replies.map((d) => d.dataValues.UserId).includes(req.user.id),
-      }))
+    Reply.findAll({
+      where: {UserId: userid},
+      include: [
+        { model: Tweet, include: [User]},
+      ]
+    }).then(async (replies) => {
+      // console.log(replies[0].dataValues)
       // 取得右邊欄位的Top users
-      const topUsers = await helpers.getTopuser(req.user)
-      //推文數&追蹤&追隨數量
-      const tweetCount = tweets.length
-      const followerCount = tweets[0].followerCount
-      const followingCount = tweets[0].followingCount
-      // console.log(replies)
-      // console.log(tweets[0])
+      // console.log('***Follower***',helpers.getUser(req).Followers)
+      // console.log('***Followings***',helpers.getUser(req).Followings)
+      const followerCount = helpers.getUser(req).Followers.length
+      const followingCount =  helpers.getUser(req).Followings.length
+      const topUsers = await helpers.getTopuser(helpers.getUser(req))
       return res.render('profile', {
-        tweets: tweets,
-        users: topUsers,
-        tweetCount,
-        followerCount,
-        followingCount,
-        page: 'profile_replies',
         replies: replies,
+        users: topUsers,
+        page: 'profile_replies',
+        followerCount, followerCount,
+        followingCount, followingCount,
       })
     })
+
+    // Tweet.findAll({
+    //   where: { UserId: userid },
+    //   include: [User, Like, Reply],
+    //   order: [['createdAt', 'DESC']],
+    // }).then(async (tweets) => {
+    //   //計算 該則 tweet 被其他使用者喜歡或 有留言的次數
+    //   //決定 tweets.handlebar 上的 留言跟喜歡按鈕是要實心或空心
+    //   replies = tweets.map((reply) => ({
+    //     ...reply.dataValues,
+    //   }))
+    //   tweets = tweets.map((tweet) => ({
+    //     ...tweet.dataValues,
+    //     likesCount: tweet.dataValues.Likes ? tweet.dataValues.Likes.length : 0,
+    //     repliesCount: tweet.dataValues.Replies ? tweet.dataValues.Replies.length : 0,
+    //     followerCount: req.user.Followers.length,
+    //     followingCount: req.user.Followings.length,
+    //     isLiked: tweet.dataValues.Likes.map((d) => d.dataValues.UserId).includes(req.user.id),
+    //     isReplied: tweet.dataValues.Replies.map((d) => d.dataValues.UserId).includes(req.user.id),
+    //   }))
+    //   // 取得右邊欄位的Top users
+    //   const topUsers = await helpers.getTopuser(req.user)
+    //   //推文數&追蹤&追隨數量
+    //   const tweetCount = tweets.length
+    //   const followerCount = tweets[0].followerCount
+    //   const followingCount = tweets[0].followingCount
+    //   // console.log(replies)
+    //   // console.log(tweets[0])
+    //   return res.render('profile', {
+    //     tweets: tweets,
+    //     users: topUsers,
+    //     tweetCount,
+    //     followerCount,
+    //     followingCount,
+    //     page: 'profile_replies',
+    //     replies: replies,
+    //   })
+    // })
   },
 
   getProfile_likes: (req, res) => {
-    return res.render('profile', {
-      page: 'profile_likes',
+    const userid = helpers.getUser(req).id ? helpers.getUser(req).id : req.user.id
+    Like.findAll({
+      where: {UserId: userid},
+      include: [
+        { model: Tweet, include: [User, Reply, Like]},
+      ]
+    }).then(async (likes) => {
+      // console.log('***********************',likes[0].dataValues.Tweet)
+      likes = likes.filter((like) => {
+        return (like.dataValues.Tweet != null)
+      })
+      likes = likes.map((like) =>({
+        ...like.dataValues,
+        repliesCount : like.dataValues.Tweet.dataValues.Replies.length ? like.dataValues.Tweet.dataValues.Replies.length : 0,
+        likesCount : like.dataValues.Tweet.dataValues.Likes ? like.dataValues.Tweet.dataValues.Likes.length : 0,
+        isLiked : like.dataValues.Tweet.dataValues.Likes.map((d) => d.dataValues.UserId).includes(userid),
+        isReplied : like.dataValues.Tweet.dataValues.Replies.map((d) => d.dataValues.UserId).includes(userid)
+      }))  
+
+      // likes.forEach((like) => {
+        // console.log(like.Tweet.dataValues)
+        // like.repliesCount = like.Tweet.dataValues.Replies.length
+        // like.likesCount = like.Tweet.Likes ? like.Tweet.Likes.length : 0
+        // like.isLiked = like.Tweet.Likes.map((d) => d.dataValues.UserId).includes(userid)
+        // like.isReplied = like.Tweet.Replies.map((d) => d.dataValues.UserId).includes(userid)
+      // })
+      // console.log(likes)
+      // likes = likes.map((like) => ({
+
+      //     like.Tweet.likesCount
+  
+      // }))
+
+      const followerCount = helpers.getUser(req).Followers.length
+      const followingCount =  helpers.getUser(req).Followings.length
+      const topUsers = await helpers.getTopuser(helpers.getUser(req))
+      return res.render('profile', {
+        page: 'profile_likes',
+        users: topUsers,
+        likes: likes,
+        followerCount, followerCount,
+        followingCount, followingCount,
+      })
     })
+    
+    
+    
+    
   },
 }
 module.exports = userController
